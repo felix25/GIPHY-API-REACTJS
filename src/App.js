@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import { CardList } from './components/card-list/card-list.component';
 import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const numberPage = 12;
+class App extends Component{
+  constructor(){
+    super();
+    this.state={
+      dataGiphy:[],
+      paginate: 0,
+      disable:true
+    }
+  }
+  componentDidMount(){
+    this.loadData();
+  }
+  loadData =()=>{
+    fetch(`http://api.giphy.com/v1/stickers/search?q=pet&limit=${numberPage}&offset=${this.state.paginate}&api_key=aFFKTuSMjd6j0wwjpFCPXZipQbcnw3vB`)
+    .then(response=>response.json())
+    .then(resp=>this.setState({dataGiphy:resp.data}))
+  }  
+  changePage =(event)=>{
+    const id = event.target.id;
+    let page = id ==='prev' ? this.state.paginate - numberPage : this.state.paginate + numberPage;
+    this.setState({
+      paginate: page,
+      disable: page === 0 ? true :false
+    }, () => this.loadData());
+  }
+  render(){
+    const { dataGiphy } = this.state;
+    return (
+      <div className="App">
+        <h1>My Giphy</h1>
+        <button id="prev" disabled={this.state.disable} onClick={this.changePage}>Prev Page</button>
+        <button id="next" onClick={this.changePage}>Next Page</button>
+        <CardList giphy={dataGiphy} />
+      </div>
+    );
+  }
 }
-
 export default App;
